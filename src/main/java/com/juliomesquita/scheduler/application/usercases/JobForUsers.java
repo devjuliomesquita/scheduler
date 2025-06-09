@@ -1,11 +1,15 @@
 package com.juliomesquita.scheduler.application.usercases;
 
+import com.juliomesquita.scheduler.domain.UserAggregate;
+import com.juliomesquita.scheduler.domain.entities.ProcessEntity;
 import com.juliomesquita.scheduler.domain.repositories.ProcessRepository;
 import com.juliomesquita.scheduler.domain.repositories.UserRepository;
 import com.juliomesquita.scheduler.infra.serviceExternal.ProcessClient;
+import com.juliomesquita.scheduler.infra.serviceExternal.dtos.ProcessClientResponse;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -23,8 +27,18 @@ public class JobForUsers {
       this.processClient = Objects.requireNonNull(processClient);
    }
 
-   @Scheduled()
+   @Scheduled(cron = "0 0 12 * * *") // "0 0 12 * * *" = todo dia às 12:00:00 (meio-dia)
    public void execute(){
-      //TODO: Job Implementation
+      final List<UserAggregate> users = this.userRepository.findAll();
+      users.forEach(user -> {
+         final ProcessClientResponse responseClient = this.processClient.getInfoProcess(user.getId());
+
+         final ProcessEntity process = ProcessEntity.createProcess(responseClient.processId(), responseClient.numberProcess());
+         this.processRepository.save(process);
+
+         user.changeStatus();
+         this.userRepository.save(user);
+      });
+
    }
 }
