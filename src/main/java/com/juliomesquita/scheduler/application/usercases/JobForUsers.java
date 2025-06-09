@@ -1,13 +1,11 @@
 package com.juliomesquita.scheduler.application.usercases;
 
-import com.juliomesquita.scheduler.domain.UserAggregate;
 import com.juliomesquita.scheduler.domain.repositories.ProcessRepository;
 import com.juliomesquita.scheduler.domain.repositories.UserRepository;
 import com.juliomesquita.scheduler.infra.serviceExternal.ProcessClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -27,10 +25,6 @@ public class JobForUsers {
 
    @Scheduled()
    public void execute(){
-      final List<UserAggregate> users = this.userRepository.findAll();
-      users.forEach(user -> {
-
-      });
-
+      //TODO: Job Implementation
    }
 }
