@@ -40,6 +40,5 @@ public class JobForUsers {
          user.changeStatus();
          this.userRepository.save(user);
       });
-
    }
 }
