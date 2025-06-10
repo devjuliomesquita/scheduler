@@ -4,6 +4,7 @@ import com.juliomesquita.scheduler.domain.enums.ProcessStatus;
 import jakarta.persistence.*;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 public class UserAggregate {
@@ -19,23 +20,28 @@ public class UserAggregate {
    @Enumerated(EnumType.STRING)
    private ProcessStatus status;
 
+   private UUID processId;
+
    public static UserAggregate create(final String name, final String email) {
       return new UserAggregate(
               name,
               email,
-              ProcessStatus.PENDING
+              ProcessStatus.PENDING,
+              null
       );
    }
 
-   public UserAggregate changeStatus() {
+   public UserAggregate changeStatus(UUID processId) {
       this.status = ProcessStatus.PROCESSED;
+      this.processId = processId;
       return this;
    }
 
-   private UserAggregate(final String name, final String email, final ProcessStatus status) {
+   private UserAggregate(String name, String email, ProcessStatus status, UUID processId) {
       this.name = name;
       this.email = email;
       this.status = status;
+      this.processId = processId;
    }
 
    public UserAggregate() {
@@ -57,16 +63,22 @@ public class UserAggregate {
       return status;
    }
 
+   public UUID getProcessId() {
+      return processId;
+   }
+
    @Override
    public boolean equals(Object o) {
       if (o == null || getClass() != o.getClass()) return false;
       UserAggregate that = (UserAggregate) o;
       return Objects.equals(id, that.id) && Objects.equals(
-              name, that.name) && Objects.equals(email, that.email) && status == that.status;
+              name, that.name) && Objects.equals(
+              email, that.email) && status == that.status && Objects.equals(
+              processId, that.processId);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(id, name, email, status);
+      return Objects.hash(id, name, email, status, processId);
    }
 }
