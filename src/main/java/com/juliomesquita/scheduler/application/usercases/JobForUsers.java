@@ -8,8 +8,10 @@ import com.juliomesquita.scheduler.domain.repositories.UserRepository;
 import com.juliomesquita.scheduler.infra.serviceExternal.ProcessClient;
 import com.juliomesquita.scheduler.infra.serviceExternal.dtos.ProcessClientResponse;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,19 +31,31 @@ public class JobForUsers {
       this.processClient = Objects.requireNonNull(processClient);
    }
 
-   @Transactional
+   @Autowired
+   private TransactionTemplate transactionTemplate;
+
    @Scheduled(cron = "0 0 12 * * *") // "0 0 12 * * *" = todo dia às 12:00:00 (meio-dia)
-   public void execute(){
-      final List<UserAggregate> users = this.userRepository.findByStatus(ProcessStatus.PENDING);
-      users.forEach(user -> {
-         final ProcessClientResponse responseClient = this.processClient.getInfoProcess(user.getId());
+   public void execute() {
+      boolean pending = true;
+      while (pending) {
+         pending = this.transactionTemplate.execute(transaction -> {
+            final List<UserAggregate> users = this.userRepository.findTop50ByStatus(ProcessStatus.PENDING);
+            if (users.isEmpty()) {
+               return false;
+            }
 
-         final ProcessEntity process = ProcessEntity.createProcess(
-                 responseClient.processId(), responseClient.numberProcess());
-         this.processRepository.save(process);
+            users.forEach(user -> {
+               final ProcessClientResponse responseClient = this.processClient.getInfoProcess(user.getId());
 
-         user.changeStatus(process.getId());
-         this.userRepository.save(user);
-      });
+               final ProcessEntity process = ProcessEntity.createProcess(
+                       responseClient.processId(), responseClient.numberProcess());
+               this.processRepository.save(process);
+
+               user.changeStatus(process.getId());
+               this.userRepository.save(user);
+            });
+            return true;
+         });
+      }
    }
 }

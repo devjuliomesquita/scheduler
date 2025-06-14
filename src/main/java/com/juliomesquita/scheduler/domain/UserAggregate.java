@@ -7,19 +7,25 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Table(name = "tb_users")
 public class UserAggregate {
 
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
+   @Column(name = "id", nullable = false)
    private Long id;
 
+   @Column(name = "name", nullable = false)
    private String name;
 
+   @Column(name = "email", nullable = false)
    private String email;
 
    @Enumerated(EnumType.STRING)
+   @Column(name = "status", nullable = false)
    private ProcessStatus status;
 
+   @Column(name = "process_id")
    private UUID processId;
 
    public static UserAggregate create(final String name, final String email) {
@@ -44,7 +50,7 @@ public class UserAggregate {
       this.processId = processId;
    }
 
-   public UserAggregate() {
+   protected UserAggregate() {
    }
 
    public Long getId() {

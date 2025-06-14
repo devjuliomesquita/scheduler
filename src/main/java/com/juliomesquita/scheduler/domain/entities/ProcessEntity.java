@@ -1,22 +1,22 @@
 package com.juliomesquita.scheduler.domain.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 
-import javax.swing.*;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Table(name = "tb_process")
 public class ProcessEntity {
 
    @Version
    private Long version;
 
    @Id
+   @Column(name = "id", nullable = false)
    private UUID id;
 
+   @Column(name = "number_process", nullable = false)
    private String numberProcess;
 
    public static ProcessEntity createProcess(final UUID id, final String numberProcess) {

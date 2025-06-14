@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    properties:
+      jakarta: # Scrip para geração de migration
+        persistence:
+          schema-generation:
+            create-source: metadata
+            scripts:
+              action: update
+              create-target: src/main/resources/db/hibernate/db_create.sql
+              drop-target: src/main/resources/db/hibernate/db_drop.sql
+              update-target: src/main/resources/db/hibernate/db_update.sql
+postgres:
+  url: localhost:5432
+  username: postgres
+  password: postgres
+  schema: scheduler
