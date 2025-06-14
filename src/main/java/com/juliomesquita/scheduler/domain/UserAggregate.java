@@ -43,6 +43,11 @@ public class UserAggregate {
       return this;
    }
 
+   public UserAggregate markStatusIgnored() {
+      this.status = ProcessStatus.IGNORED;
+      return this;
+   }
+
    private UserAggregate(String name, String email, ProcessStatus status, UUID processId) {
       this.name = name;
       this.email = email;
