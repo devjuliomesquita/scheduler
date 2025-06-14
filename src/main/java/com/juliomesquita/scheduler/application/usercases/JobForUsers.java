@@ -9,7 +9,6 @@ import com.juliomesquita.scheduler.infra.serviceExternal.ProcessClient;
 import com.juliomesquita.scheduler.infra.serviceExternal.dtos.ProcessClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,7 +33,8 @@ public class JobForUsers {
        final UserRepository userRepository,
        final ProcessRepository processRepository,
        final ProcessClient processClient,
-       final TransactionTemplate transactionTemplate) {
+       final TransactionTemplate transactionTemplate
+   ) {
       this.userRepository = Objects.requireNonNull(userRepository);
       this.processRepository = Objects.requireNonNull(processRepository);
       this.processClient = Objects.requireNonNull(processClient);
