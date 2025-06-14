@@ -17,9 +17,10 @@ public class ProcessClientImpl implements ProcessClient {
 
    @Override
    public ProcessClientResponse getInfoProcess(final Long userId) {
+      final var baseUrl = "";
       return this.restClient
           .get()
-          .uri("/{userId}", userId)
+          .uri(baseUrl + "/{userId}", userId)
           .retrieve()
           .body(ProcessClientResponse.class);
    }
