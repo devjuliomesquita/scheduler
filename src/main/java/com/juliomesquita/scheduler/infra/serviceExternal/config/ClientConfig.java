@@ -22,24 +22,22 @@ public class ClientConfig {
           .setConnectTimeout(Timeout.ofSeconds(2))
           .setSocketTimeout(Timeout.ofSeconds(4))
           .build();
-      var connectionManager = new PoolingHttpClientConnectionManager();
+      final var connectionManager = new PoolingHttpClientConnectionManager();
       connectionManager.setDefaultConnectionConfig(connection);
       connectionManager.setMaxTotal(100);
       connectionManager.setDefaultMaxPerRoute(10);
 
-      final var request = RequestConfig.custom()
-          .setConnectionRequestTimeout(Timeout.ofSeconds(2))
-          .build();
+      final var request = RequestConfig.custom().setConnectionRequestTimeout(Timeout.ofSeconds(2)).build();
 
       final var httpClient = HttpClients.custom()
           .setDefaultRequestConfig(request)
           .setConnectionManager(connectionManager)
           .evictIdleConnections(TimeValue.ofSeconds(30))
           .build();
-      final var factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+
       return builder
           .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-          .requestFactory(factory)
+          .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient))
           .build();
    }
 }
