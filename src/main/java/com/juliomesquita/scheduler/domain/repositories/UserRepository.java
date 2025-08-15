@@ -1,6 +1,6 @@
 package com.juliomesquita.scheduler.domain.repositories;
 
-import com.juliomesquita.scheduler.domain.UserAggregate;
+import com.juliomesquita.scheduler.domain.entities.UserEventsEntity;
 import com.juliomesquita.scheduler.domain.enums.ProcessStatus;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserAggregate, Long> {
+public interface UserRepository extends JpaRepository<UserEventsEntity, Long> {
 
    @QueryHints({
            @QueryHint(name = "javax.persistence.lock.timeout", value = "-2")
    })
    @Lock(LockModeType.PESSIMISTIC_WRITE)
-   List<UserAggregate> findTop50ByStatus(ProcessStatus status);
+   List<UserEventsEntity> findTop50ByStatus(ProcessStatus status);
 }

@@ -1,6 +1,7 @@
 package com.juliomesquita.scheduler.application.usercases;
 
-import com.juliomesquita.scheduler.domain.UserAggregate;
+import com.juliomesquita.scheduler.application.services.ProcessService;
+import com.juliomesquita.scheduler.domain.entities.UserEventsEntity;
 import com.juliomesquita.scheduler.domain.entities.ProcessEntity;
 import com.juliomesquita.scheduler.domain.enums.ProcessStatus;
 import com.juliomesquita.scheduler.domain.repositories.ProcessRepository;
@@ -26,18 +27,18 @@ public class JobForUsers {
    private final static Logger log = LoggerFactory.getLogger(JobForUsers.class);
    private final UserRepository userRepository;
    private final ProcessRepository processRepository;
-   private final ProcessClient processClient;
+   private final ProcessService processService;
    private final TransactionTemplate transactionTemplate;
 
    public JobForUsers(
        final UserRepository userRepository,
        final ProcessRepository processRepository,
-       final ProcessClient processClient,
+       final ProcessService processService,
        final TransactionTemplate transactionTemplate
    ) {
       this.userRepository = Objects.requireNonNull(userRepository);
       this.processRepository = Objects.requireNonNull(processRepository);
-      this.processClient = Objects.requireNonNull(processClient);
+      this.processService = Objects.requireNonNull(processService);
       this.transactionTemplate = Objects.requireNonNull(transactionTemplate);
    }
 
@@ -46,14 +47,13 @@ public class JobForUsers {
       boolean pending = true;
       while (pending) {
          pending = Boolean.TRUE.equals(this.transactionTemplate.execute(transaction -> {
-            final List<UserAggregate> users = this.userRepository.findTop50ByStatus(ProcessStatus.PENDING);
+            final List<UserEventsEntity> users = this.userRepository.findTop50ByStatus(ProcessStatus.PENDING);
             if (users.isEmpty()) {
                return false;
             }
-
             users.forEach(user -> {
                try {
-                  final ProcessClientResponse responseClient = this.fetchProcessClient(user.getId());
+                  final ProcessClientResponse responseClient = this.processService.fetchProcessClient(user.getId());
 
                   final ProcessEntity process = ProcessEntity.createProcess(
                       responseClient.processId(), responseClient.numberProcess());
@@ -74,29 +74,6 @@ public class JobForUsers {
             });
             return true;
          }));
-      }
-   }
-
-   @Retryable(
-       maxAttempts = 3,
-       backoff = @Backoff(delay = 1500, multiplier = 2),
-       retryFor = {
-           HttpServerErrorException.class,
-           ResourceAccessException.class
-       },
-       noRetryFor = {
-           HttpClientErrorException.BadRequest.class,
-           HttpClientErrorException.NotFound.class,
-           HttpClientErrorException.Unauthorized.class,
-           HttpClientErrorException.Forbidden.class,
-       }
-   )
-   private ProcessClientResponse fetchProcessClient(final Long userId) {
-      try {
-         return this.processClient.getInfoProcess(userId);
-      } catch (Exception e) {
-         log.warn("Error when searching for data... | message: {}", e.getMessage());
-         throw e;
       }
    }
 }
